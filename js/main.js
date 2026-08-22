@@ -17,6 +17,9 @@ async function init() {
   // Populate Page based on data from json file
   createChSelectionDiv(johnData.materialInfo);
   createQTypeSelectionDiv(johnData.quesTypeInfo);
+
+  // Test Font Resize
+  fitTextToGridItem();
 }
 
 /*
@@ -308,36 +311,25 @@ function getQuizSettings(quizSettings) {
 }
 
 // DYNAMIC CELL RESIZING - change this to run when quizzes are displayed???
-function fitTextToCell(element) {
-  // Reset font size to a high starting point to recalculate downwards
-  let fontSize = 16;
-  element.style.fontSize = fontSize + "px";
+function fitTextToGridItem() {
+  let pageEls = document.querySelectorAll(".page");
 
-  // Loop and shrink font size until text fits perfectly inside the cell boundaries
-  while (
-    (element.scrollHeight > element.clientHeight ||
-      element.scrollWidth > element.clientWidth) &&
-    fontSize > 8 // Stop shrinking at 8px so it doesn't become invisible
-  ) {
-    fontSize--;
-    element.style.fontSize = fontSize + "px";
+  for (let pageEl of pageEls) {
+    console.log(pageEl);
+    // Decrease font size dynamically if text overflows either dimension
+    while (
+      pageEl.scrollHeight > pageEl.clientHeight ||
+      pageEl.scrollWidth > pageEl.clientWidth
+    ) {
+      let pageNum = pageEl.dataset.pagenum;
+      console.log(pageNum);
+      document
+        .querySelectorAll(`.question-div-${pageNum} > div`)
+        .forEach((element) => {
+          let fontSize = parseInt(window.getComputedStyle(element).fontSize);
+          fontSize -= 0.25;
+          element.style.fontSize = fontSize + "px";
+        });
+    }
   }
 }
-
-// Automatically target and adjust all elements with the 'autofit-text' class
-const textCells = document.querySelectorAll(".questions > div");
-
-// Use ResizeObserver so it automatically recalculates if the parent grid container resizes
-const resizeObserver = new ResizeObserver((entries) => {
-  for (let entry of entries) {
-    fitTextToCell(entry.target);
-  }
-});
-
-// Initialize the observer on your target cells
-textCells.forEach((cell) => {
-  // Initial run
-  fitTextToCell(cell);
-  // Watch for layout shifts
-  resizeObserver.observe(cell);
-});

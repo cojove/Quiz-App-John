@@ -23,7 +23,7 @@ h1 {
 }
 
 main {
-  max-width: 800px;
+  max-width: 8.5in;
   margin: auto;
 }
 
@@ -48,6 +48,7 @@ input[type="number"]::-webkit-inner-spin-button {
 
 .material-grid {
   display: grid;
+  margin-bottom: 3rem;
 
   @media (width > 750px) {
     grid-template-columns: 1fr 1fr;
