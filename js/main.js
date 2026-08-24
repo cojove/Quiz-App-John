@@ -8,7 +8,7 @@ let allQuestions;
 
 async function init() {
   // Load data from JohnData.json
-  const response = await fetch("../JohnData.json");
+  const response = await fetch("JohnData.json");
   const johnData = await response.json();
 
   // Save questions globally for access from Event Listeners
