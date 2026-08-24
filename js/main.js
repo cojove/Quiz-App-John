@@ -14,12 +14,9 @@ async function init() {
   // Save questions globally for access from Event Listeners
   allQuestions = johnData.questions;
 
-  // Populate Page based on data from json file
+  // Create Chapter Selection and Question Type divs based on data from json file
   createChSelectionDiv(johnData.materialInfo);
   createQTypeSelectionDiv(johnData.quesTypeInfo);
-
-  // Test Font Resize
-  fitTextToGridItem();
 }
 
 /*
@@ -29,25 +26,23 @@ async function init() {
 // Initialize on DOM Content Loaded
 document.addEventListener("DOMContentLoaded", init);
 
-// Senior A Button Event Listener
+// Senior A Btn Event Listener: Set Question Types to Senior A Settings
+
 document.getElementById("sr-a-btn").addEventListener("click", (e) => {
-  // Set Question Types to Senior A Settings
   setAllQTypesChecked();
   setAllQTypesMinMaxReset();
   setAllQTypesClubs("Text", "Text", "Text", "Text", "Text", "Text");
 });
 
-// Rookie A Button Event Listener
+// Rookie A Btn Event Listener: Set Question Types to Rookie A Settings
 document.getElementById("rk-a-btn").addEventListener("click", (e) => {
-  // Set Question Types to Rookie A Settings
   setAllQTypesChecked();
   setAllQTypesMinMaxReset();
   setAllQTypesClubs("Text", "Text", "300", "150", "150", "300");
 });
 
-// B Division Button Event Listener
+// B Division Btn Event Listener: Set Question Types to B Division Settings
 document.getElementById("b-div-btn").addEventListener("click", (e) => {
-  // Set Question Types to B Division Settings
   setAllQTypesChecked();
   setAllQTypesMinMaxReset();
   setAllQTypesClubs("Text", "Text", "150", "150", "150", "150");
@@ -56,7 +51,6 @@ document.getElementById("b-div-btn").addEventListener("click", (e) => {
 // Create Quizzes Button Event Listener
 document.getElementById("create-qz-btn").addEventListener("click", (e) => {
   // Get and validate user selections.
-  // Save in quizSettings and send to Python for quiz generation
   let quizSettings = {};
 
   // Get and Validate Chapter Selections
@@ -74,7 +68,14 @@ document.getElementById("create-qz-btn").addEventListener("click", (e) => {
   if (!valid) return false;
 
   // Send Quiz Settings and All Questions for Quiz Creation
+  document.getElementById("feedback").innerHTML = "Generating Quizzes...";
   let response = createQuizzes(allQuestions, quizSettings);
+  if (response.err == "Error") {
+    displayError(response.quizzes);
+  } else {
+    outputQuizzes(response.quizzes, quizSettings);
+    displayPrintBtn();
+  }
 });
 
 /*
@@ -253,13 +254,8 @@ function createTypeClubCombos(typeStr, clubStrings) {
 }
 
 function getQuizSettings(quizSettings) {
-  // Get & Validate Quiz Title
-  let quizTitle = document.getElementById("quiz-title").value;
-  if (quizTitle.length == 0) {
-    alert("Quiz Title cannot be empty.");
-    return false;
-  }
-  quizSettings.quizTitle = quizTitle;
+  // Get Quiz Title
+  quizSettings.quizTitle = document.getElementById("quiz-title").value;
 
   // Get and Validate Number of Quizzes
   let numQuizzes = +document.getElementById("num-quizzes").value;
@@ -294,42 +290,17 @@ function getQuizSettings(quizSettings) {
     quizSettings.maxQuesUse = maxQuesUse;
   }
 
-  // Get Extra Questions Selection
-  quizSettings.extraQues = document.getElementById("extra-ques").checked;
+  // Get Include A&B Questions Selection
+  quizSettings.includeAB = document.getElementById("include-ab").checked;
 
-  // Get Final Quiz Selection
-  quizSettings.finalQuiz = document.getElementById("final-quiz").checked;
+  // // Get Extra Questions Selection
+  // quizSettings.extraQues = document.getElementById("extra-ques").checked;
 
-  // Add variable for the number of questions to put in a quiz
-  // 20 + 5A + 5B questions
-  quizSettings.numQuesInQuiz = 30;
+  // // Get Final Quiz Selection
+  // quizSettings.finalQuiz = document.getElementById("final-quiz").checked;
 
   // Add variable to track number of "W" questions in a quiz
   quizSettings.wCount = 0;
 
   return true;
-}
-
-// DYNAMIC CELL RESIZING - change this to run when quizzes are displayed???
-function fitTextToGridItem() {
-  let pageEls = document.querySelectorAll(".page");
-
-  for (let pageEl of pageEls) {
-    console.log(pageEl);
-    // Decrease font size dynamically if text overflows either dimension
-    while (
-      pageEl.scrollHeight > pageEl.clientHeight ||
-      pageEl.scrollWidth > pageEl.clientWidth
-    ) {
-      let pageNum = pageEl.dataset.pagenum;
-      console.log(pageNum);
-      document
-        .querySelectorAll(`.question-div-${pageNum} > div`)
-        .forEach((element) => {
-          let fontSize = parseInt(window.getComputedStyle(element).fontSize);
-          fontSize -= 0.25;
-          element.style.fontSize = fontSize + "px";
-        });
-    }
-  }
 }

@@ -168,3 +168,6 @@ def processFoundQuestion(question, quiz_questions, group_questions, quiz_setting
 
 # Start the application, opening index.html in a local browser window
 eel.start('index.html', size=(800, 600))
+
+
+

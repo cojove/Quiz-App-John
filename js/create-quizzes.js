@@ -57,11 +57,7 @@ function createQuizzes(allQuestions, quizSettings) {
   quizNum = 1;
   while (quizzes.length < quizSettings.numQuizzes) {
     let quiz = createQuiz(groupQuestions, quizSettings, quizNum);
-    if (quiz == "Error") {
-      console.log("Error", quizzes);
-
-      return "Error creating quizzes";
-    }
+    if (quiz == "Error") return { err: "Error", quizzes: quizzes };
     quizzes.push(quiz);
     quizNum++;
   }
@@ -70,8 +66,7 @@ function createQuizzes(allQuestions, quizSettings) {
 
   // Check Extra Questions
 
-  // Output Quizzes
-  console.log("Quizzes:", quizzes);
+  return { err: "", quizzes: quizzes };
 }
 
 // ********************
@@ -110,7 +105,7 @@ function createQuiz(groupQuestions, quizSettings, quizNum) {
 
   // Init quiz variable to store quiz title and questions
   let quiz = {
-    title: `Quiz ${quizNum} - ${quizSettings.quizTitle}`,
+    title: `#${quizNum}: ${quizSettings.quizTitle}`,
     questions: [],
     alphaQuestions: [],
   };
@@ -187,6 +182,7 @@ function createQuiz(groupQuestions, quizSettings, quizNum) {
     quiz.alphaQuestions.push(question);
   }
 
+  shuffle(quiz.questions);
   return quiz;
 }
 

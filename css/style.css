@@ -13,13 +13,18 @@ body {
     sans-serif;
 
   font-size: 0.8rem;
+  color: #1a1a1a;
+}
+
+.panel {
+  background-color: #f9f9f9;
 }
 
 h1 {
   text-align: center;
   font-weight: bold;
   font-size: 1.15rem;
-  margin-block: 1rem;
+  margin-block: 0.8rem;
 }
 
 main {
@@ -49,10 +54,14 @@ input[type="number"]::-webkit-inner-spin-button {
 .material-grid {
   display: grid;
   margin-bottom: 3rem;
+  padding: 5px;
+  max-width: 400px;
+  margin: auto;
+  gap: 1rem;
 
-  @media (width > 750px) {
+  @media (width > 800px) {
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    max-width: 100%;
   }
 
   h2 {
@@ -63,18 +72,17 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 .material-grid > div {
-  border: 1px solid grey;
-  padding: 0.5rem 1rem;
+  border: 1px solid #aaa;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 0.5rem;
+  max-width: 400px;
 }
 
 #chapter-grid {
   display: grid;
+  grid-template-columns: 1fr 1fr;
 
-  @media (width > 550px) {
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    justify-content: space-around;
-  }
+  justify-content: space-between;
 
   .chapter-row {
     margin-bottom: 0.25rem;
@@ -106,6 +114,13 @@ input[type="number"]::-webkit-inner-spin-button {
 
 .div-btns button {
   flex: 1;
+  background-color: #4a90e2;
+  color: white;
+  cursor: pointer;
+}
+
+.div-btns button:hover {
+  background-color: #3278c7;
 }
 
 .settings {
@@ -120,10 +135,37 @@ input[type="number"]::-webkit-inner-spin-button {
   width: 100%;
 }
 
+#num-quizzes {
+  margin-right: 10px;
+}
+
 strong {
   font-weight: bold;
 }
 
-#create-qz-btn {
+#create-qz-btn,
+#feedback button {
+  background-color: #e53935;
+  color: white;
   width: 100%;
+}
+
+#create-qz-btn:hover,
+#feedback button:hover {
+  background-color: #d12724;
+}
+
+em {
+  font-style: italic;
+}
+
+button {
+  display: inline-block;
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+  border-radius: 3px;
+  padding-block: 2px;
 }

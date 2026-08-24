@@ -12,6 +12,7 @@
     <script src="js/helpers.js"></script>
     <script src="js/create-gui.js"></script>
     <script src="js/create-quizzes.js"></script>
+    <script src="js/output-quizzes.js"></script>
     <script defer src="js/main.js"></script>
   </head>
   <body>
@@ -21,9 +22,9 @@
       <!-- Chapter & Question Type Selection Section -->
       <section class="material-grid no-print">
         <!-- Chapter Selection Div -->
-        <div id="chapter-grid"></div>
+        <div class="panel" id="chapter-grid"></div>
         <!-- Question Types & Quiz Settings Div -->
-        <div>
+        <div class="panel">
           <h2>Question Types</h2>
           <div id="qtype-div"></div>
           <div class="div-btns">
@@ -39,9 +40,7 @@
             <p>
               Number of Quizzes:
               <input id="num-quizzes" type="number" value="1" />
-            </p>
-            <p>
-              Max INT "W" Questions:
+              Max "W" Questions:
               <input id="max-w" type="number" value="3" />
             </p>
             <p>
@@ -71,6 +70,12 @@
             </p>
             <p>
               <label>
+                <input type="checkbox" id="include-ab" checked /> Include A & B
+                Questions
+              </label>
+            </p>
+            <!-- <p>
+              <label>
                 <input type="checkbox" id="extra-ques" /> Create Extra Questions
                 for Quiz Meet
               </label>
@@ -80,485 +85,19 @@
                 <input type="checkbox" id="final-quiz" /> Create Additional
                 Final Quiz
               </label>
-            </p>
+            </p> -->
             <p>
               <button id="create-qz-btn">CREATE QUIZ(ZES)</button>
             </p>
+          </div>
+          <div>
+            <p id="feedback"></p>
           </div>
         </div>
       </section>
 
       <!-- Created Quizzes Output Section -->
-      <section id="quiz-output">
-        <div class="page" data-pagenum="1">
-          <!-- Header -->
-          <h2 class="header-row">Quiz Title</h2>
-          <div class="grid-container">
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet consectetur adipisicing
-                elit. Minima consequuntur dicta quos sint quas accusamus
-                deserunt necessitatibus laudantium ratione in.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet consectetur adipisicing
-                elit. Vel, quos.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum, dolor sit amet consectetur adipisicing
-                elit. Soluta laudantium dolor laboriosam aperiam ipsam.
-                Distinctio et repudiandae earum temporibus voluptate unde
-                itaque, perspiciatis iste deleniti. Consectetur sunt totam nam
-                facilis!
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet consectetur adipisicing
-                elit. Quam porro tenetur exercitationem nemo deleniti! Ipsam.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet consectetur adipisicing
-                elit. Eos, qui?
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet consectetur adipisicing
-                elit. Similique ipsum repellendus, corrupti molestiae nemo
-                pariatur?
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>Lorem ipsum dolor sit amet consectetur.</div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet consectetur adipisicing
-                elit. Veniam, assumenda?
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-1">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor, sit amet consectetur adipisicing.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- PAGE BREAK FOR PRINTING -->
-        <div class="page-break"></div>
-
-        <div class="page" data-pagenum="2">
-          <!-- Header -->
-          <h2 class="header-row">Quiz Title</h2>
-          <div class="grid-container">
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet. Lorem ipsum, dolor sit
-                amet consectetur adipisicing elit. Dolorem, in unde! Esse ullam
-                amet quia sequi. Ab nemo mollitia corporis?
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet consectetur adipisicing
-                elit. Minima consequuntur dicta quos sint quas accusamus
-                deserunt necessitatibus laudantium ratione in.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet consectetur, adipisicing
-                elit. Consequatur autem modi aspernatur architecto unde quam.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet
-                consectetur adipisicing elit. Nulla dolor magnam et cumque eaque
-                corrupti rerum. Possimus consectetur minima itaque, in
-                perferendis eos nulla unde laudantium odio dolor autem officia?
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum, dolor sit amet consectetur adipisicing
-                elit. Soluta laudantium dolor laboriosam aperiam ipsam.
-                Distinctio et repudiandae earum temporibus voluptate unde
-                itaque, perspiciatis iste deleniti. Consectetur sunt totam nam
-                facilis!
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsu
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Odio facere beatae temporibus. ipsum dolor sit amet consectetur
-                adipisicing elit.
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">
-                This is a question? Lorem ipsum dolor sit amet consectetur
-                adipisicing elit. Blanditiis consequatur at quis omnis!
-              </div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                elit. Eos, qui?
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet consectetur adipisicing
-                elit. Saepe deserunt ex laborum enim veniam earum asperiores
-                molestiae, odit nam incidunt corrupti placeat nemo dolore atque!
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                pariatur?
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">
-                This is a question? Lorem ipsum dolor sit amet consectetur
-                adipisicing elit.
-              </div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet
-                consectetur adipisicing elit. Dignissimos, rerum!
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet consectetur adipisicing
-                elit. Consectetur labore saepe voluptatibus illo?
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">
-                This is a question? Lorem ipsum dolor sit amet consectetur
-                adipisicing elit. Voluptatem, ea eaque repellat sapiente
-                similique quam?
-              </div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur. Lorem ipsum dolor, sit
-                amet consectetur adipisicing elit. Officia repellendus illo
-                repellat! Non modi earum tempora quisquam rerum architecto
-                consequatur iusto dolorem minima pariatur!
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-                voluptas. Lorem ipsum dolor sit amet consectetur adipisicing
-                elit. Veniam, assumenda?
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-            <!-- Question Div -->
-            <div class="grid-cell question-div-2">
-              <div>1</div>
-              <div>INT</div>
-              <div>Q:</div>
-              <div class="ques-text">This is a question?</div>
-              <div>A:</div>
-              <div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius,
-              </div>
-              <div class="ref-div">John 1: 1 (Club 150)</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <section id="quiz-output" class="print-only"></section>
     </main>
   </body>
 </html>

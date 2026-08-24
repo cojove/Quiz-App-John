@@ -16,6 +16,9 @@ function createChSelectionDiv(materialInfo) {
 
   // Add htmlStr to Chapter Grid Element
   document.getElementById("chapter-grid").innerHTML = htmlStr;
+
+  // Set first Chapter to Checked
+  document.querySelector('input[data-id="ch-section-0"]').checked = true;
 }
 
 // Returns HTML for a chapter selection row
