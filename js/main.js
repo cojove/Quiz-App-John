@@ -75,6 +75,7 @@ document.getElementById("create-qz-btn").addEventListener("click", (e) => {
   } else {
     outputQuizzes(response.quizzes, quizSettings);
     displayPrintBtn();
+    alert('Quizzes Created. Click "Print Quiz(zes)" button to view.');
   }
 });
 
