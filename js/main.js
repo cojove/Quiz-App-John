@@ -71,7 +71,7 @@ document.getElementById("create-qz-btn").addEventListener("click", (e) => {
   document.getElementById("feedback").innerHTML = "Generating Quizzes...";
   let response = createQuizzes(allQuestions, quizSettings);
   if (response.err == "Error") {
-    displayError(response.quizzes);
+    displayError(response.quizzes, response.errDetail);
   } else {
     outputQuizzes(response.quizzes, quizSettings);
     displayPrintBtn();
@@ -293,6 +293,11 @@ function getQuizSettings(quizSettings) {
 
   // Get Include A&B Questions Selection
   quizSettings.includeAB = document.getElementById("include-ab").checked;
+
+  // Get Strict Mode Selection
+  quizSettings.strictMode = document.getElementById("strict-mode").checked;
+
+  quizSettings.numQuesInQuiz = quizSettings.includeAB ? 30 : 20;
 
   // // Get Extra Questions Selection
   // quizSettings.extraQues = document.getElementById("extra-ques").checked;
