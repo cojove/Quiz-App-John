@@ -1,9 +1,4 @@
-// Functions to display the results of creating quizzes
-
-function displayError(quizzes) {
-  let feedbackEl = document.getElementById("feedback");
-  feedbackEl.innerHTML = `Error Creating Quizzes (${quizzes.length} quizzes made)`;
-}
+// Renders generated quizzes for print and on-screen display.
 
 function displayPrintBtn() {
   let btn = document.createElement("button");
@@ -165,18 +160,17 @@ function createQuesDiv(classStr, quesNum, question) {
     `;
 }
 
-// DYNAMIC CELL RESIZING - change this to run when quizzes are displayed???
+/** Shrinks question text until each page fits its print layout. */
 function fitTextToGridItem() {
-  let pageEls = document.querySelectorAll(".page");
+  const pageEls = document.querySelectorAll(".page");
 
-  for (let pageEl of pageEls) {
-    console.log(pageEl);
+  for (const pageEl of pageEls) {
     // Decrease font size dynamically if text overflows either dimension
     while (
       pageEl.scrollHeight > pageEl.clientHeight ||
       pageEl.scrollWidth > pageEl.clientWidth
     ) {
-      let pageNum = pageEl.dataset.pagenum;
+      const pageNum = pageEl.dataset.pagenum;
       document
         .querySelectorAll(`.question-div-${pageNum} > div`)
         .forEach((element) => {
