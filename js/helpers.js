@@ -61,3 +61,8 @@ function quesTypeIndexByType(type, quesTypes) {
   }
   return -1;
 }
+
+// Use to log current state of data at function call
+function consoleLog(data) {
+  console.log(JSON.parse(JSON.stringify(data)));
+}

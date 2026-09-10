@@ -125,7 +125,8 @@ function createQuiz(groupQuestions, quizSettings, quizNum) {
       return "Error";
     }
     quiz.questions.push(cvrQues);
-    console.log(quiz.questions);
+    console.log("CVR Found");
+    consoleLog(quiz.questions);
 
     // Get CR question
     let crQues = getRefQues(
@@ -139,7 +140,8 @@ function createQuiz(groupQuestions, quizSettings, quizNum) {
       return "Error";
     }
     quiz.questions.push(crQues);
-    console.log(quiz.questions);
+    console.log("CR Found");
+    consoleLog(quiz.questions);
   }
 
   // Meet Minimum Question Type Requirements
@@ -409,11 +411,11 @@ function processFoundQues(
   quizSettings,
   groupQuestions,
 ) {
-  // Remove question from quizQuestions
+  // Remove question from quizQuestions - Verified
   let quizQuesIndex = quesIndexByID(quizQuestions, selectedQues.id);
   quizQuestions.splice(quizQuesIndex, 1);
 
-  // If necessary, update question count in groupQuestions and remove question if used more than maxQuesUse
+  // If necessary, update question count in groupQuestions and remove question if used more than maxQuesUse - Verified
   if (!quizSettings.resetUsedQues) {
     let groupQuesIndex = quesIndexByID(groupQuestions, selectedQues.id);
 
@@ -427,7 +429,7 @@ function processFoundQues(
   if (!quizSettings.allowDuplicateVerses) {
     for (let i = quizQuestions.length - 1; i >= 0; i--) {
       if (quizQuestions[i].ref == selectedQues.ref) {
-        quizQuestions.slice(i, 1);
+        quizQuestions.splice(i, 1);
       }
     }
   }
