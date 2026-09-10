@@ -1,25 +1,14 @@
 // Functions to display the results of creating quizzes
 
-function displayError(quizzes) {
-  let feedbackEl = document.getElementById("feedback");
-  feedbackEl.innerHTML = `Error Creating Quizzes (${quizzes.length} quizzes made)`;
-}
-
-function displayPrintBtn() {
-  let btn = document.createElement("button");
-  btn.innerHTML = "PRINT QUIZ(ZES)";
-  btn.addEventListener("click", () => window.print());
-
-  let feedbackEl = document.getElementById("feedback");
-  feedbackEl.replaceChildren(btn);
-}
-
 function outputQuizzes(quizzes, quizSettings) {
   if (quizSettings.includeAB) {
     outputDistrictQuizzes(quizzes);
   } else {
     outputChurchQuizzes(quizzes);
   }
+
+  // Launch Browser Print
+  window.print();
 }
 
 function outputDistrictQuizzes(quizzes) {

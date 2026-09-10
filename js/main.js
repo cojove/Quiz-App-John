@@ -1,10 +1,14 @@
 // WCD Quiz Generator by Colin Veldkamp
 // August 2026
 
-/*
- * INITIALIZE AFTER DOM CONTENT LOADED
- */
+// Global Variables
 let allQuestions;
+
+/*
+ * INITIALIZE ON DOMCONTENTLOADED
+ * Load data from JohnData.json; generate GUI with loaded data
+ */
+document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
   // Load data from JohnData.json
@@ -20,14 +24,10 @@ async function init() {
 }
 
 /*
- * EVENT LISTENERS
+ * QUESTION TYPE BUTTON PRESETS
  */
 
-// Initialize on DOM Content Loaded
-document.addEventListener("DOMContentLoaded", init);
-
 // Senior A Btn Event Listener: Set Question Types to Senior A Settings
-
 document.getElementById("sr-a-btn").addEventListener("click", (e) => {
   setAllQTypesChecked();
   setAllQTypesMinMaxReset();
@@ -48,7 +48,10 @@ document.getElementById("b-div-btn").addEventListener("click", (e) => {
   setAllQTypesClubs("Text", "Text", "150", "150", "150", "150");
 });
 
-// Create Quizzes Button Event Listener
+/*
+ * CREATE QUIZZES BUTTON
+ */
+
 document.getElementById("create-qz-btn").addEventListener("click", (e) => {
   // Get and validate user selections.
   let quizSettings = {};
@@ -68,14 +71,11 @@ document.getElementById("create-qz-btn").addEventListener("click", (e) => {
   if (!valid) return false;
 
   // Send Quiz Settings and All Questions for Quiz Creation
-  document.getElementById("feedback").innerHTML = "Generating Quizzes...";
   let response = createQuizzes(allQuestions, quizSettings);
   if (response.err == "Error") {
-    displayError(response.quizzes);
+    alert(`Error Creating Quizzes (${response.quizzes.length} quizzes made)`);
   } else {
     outputQuizzes(response.quizzes, quizSettings);
-    displayPrintBtn();
-    alert('Quizzes Created. Click "Print Quiz(zes)" button to view.');
   }
 });
 

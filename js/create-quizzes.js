@@ -98,91 +98,127 @@ function filterQuestions(groupQuestions, quizSettings) {
 
 // Create and return a single quiz, return "Error" if can't make quiz
 function createQuiz(groupQuestions, quizSettings, quizNum) {
-  // Check for enough possible questions
-  if (groupQuestions.length < quizSettings.numQuesInQuiz) {
-    return "Error";
-  }
+  //   Create deep copies of groupQuestions and quizSettings so that they are fresh versions for the current quiz.
+  let quizQuestions = JSON.parse(JSON.stringify(groupQuestions));
+  let quizSettingsCopy = JSON.parse(JSON.stringify(quizSettings));
+  console.log("Quiz Questions");
+  console.log(quizQuestions);
 
   // Init quiz variable to store quiz title and questions
   let quiz = {
-    title: `#${quizNum}: ${quizSettings.quizTitle}`,
+    title: `#${quizNum}: ${quizSettingsCopy.quizTitle}`,
     questions: [],
     alphaQuestions: [],
   };
 
-  //   Create deep copies of groupQuestions and quizSettings so that they are fresh versions for the current quiz.
-  let quizQuestions = JSON.parse(JSON.stringify(groupQuestions));
-  quizSettings = JSON.parse(JSON.stringify(quizSettings));
-
   // If "ref" selected with a min of 2, get a CVR and a CR question to meet requirements of at least one of each.
-  if (minTwoRefQues(quizSettings.quesTypes)) {
+  if (minTwoRefQues(quizSettingsCopy.quesTypes)) {
     // Get CVR question
     let cvrQues = getRefQues(
       ["CVR", "CVRMA"],
       quizQuestions,
-      quizSettings,
+      quizSettingsCopy,
       groupQuestions,
     );
-    if (cvrQues == "Error") return "Error";
+    if (cvrQues == "Error") {
+      console.log("No CVR");
+      return "Error";
+    }
     quiz.questions.push(cvrQues);
+    console.log(quiz.questions);
 
     // Get CR question
     let crQues = getRefQues(
       ["CR", "CRMA"],
       quizQuestions,
-      quizSettings,
+      quizSettingsCopy,
       groupQuestions,
     );
-    if (crQues == "Error") return "Error";
+    if (crQues == "Error") {
+      console.log("No CR");
+      return "Error";
+    }
     quiz.questions.push(crQues);
+    console.log(quiz.questions);
   }
 
   // Meet Minimum Question Type Requirements
-  quizSettings.quesTypes = setTypeOrder(quizSettings.quesTypes, quizQuestions);
-  if (quizSettings.quesType == "Error") return "Error";
+  quizSettingsCopy.quesTypes = setTypeOrder(
+    quizSettingsCopy.quesTypes,
+    quizQuestions,
+  );
+  if (quizSettingsCopy.quesType == "Error") {
+    console.log("Error setting type order.");
+    return "Error";
+  }
 
-  for (let quesType of quizSettings.quesTypes) {
+  for (let quesType of quizSettingsCopy.quesTypes) {
     while (quesType.count < quesType.min) {
       let question = getQuestion(
         quesType,
         quizQuestions,
-        quizSettings,
+        quizSettingsCopy,
         groupQuestions,
       );
-      if (question == "Error") return "Error";
+      if (question == "Error") {
+        console.log("Error getting minimums", quesType);
+        return "Error";
+      }
       quiz.questions.push(question);
+      console.log("Minimums", quesType.type);
+      console.log(quiz.questions);
     }
   }
 
   // Randomly Select Remaining Numeric 1-20 Questions
   while (quiz.questions.length < 20) {
-    let quesType = randomElement(quizSettings.quesTypes);
-    if (!quesType) return "Error";
-    let question = getQuestion(
-      quesType,
-      quizQuestions,
-      quizSettings,
-      groupQuestions,
-    );
-    if (question == "Error") return "Error";
-    quiz.questions.push(question);
+    shuffle(quizSettingsCopy.quesTypes);
+    let quesFound = false;
+    for (let quesType of quizSettingsCopy.quesTypes) {
+      let question = getQuestion(
+        quesType,
+        quizQuestions,
+        quizSettingsCopy,
+        groupQuestions,
+      );
+      if (question != "Error") {
+        quiz.questions.push(question);
+        quesFound = true;
+        console.log("Random Numeric", quesType.type);
+        console.log(quiz.questions);
+        break;
+      }
+    }
+    // No question after searching through all question types
+    if (!quesFound) return "Error";
   }
 
   // Randomly Select 10 A&B Questions
-  while (quiz.alphaQuestions.length < 10) {
-    let quesType = randomElement(quizSettings.quesTypes);
-    if (!quesType) return "Error";
-    let question = getQuestion(
-      quesType,
-      quizQuestions,
-      quizSettings,
-      groupQuestions,
-    );
-    if (question == "Error") return "Error";
-    quiz.alphaQuestions.push(question);
+  if (quizSettingsCopy.includeAB) {
+    while (quiz.alphaQuestions.length < 10) {
+      shuffle(quizSettingsCopy.quesTypes);
+      let quesFound = false;
+      for (let quesType of quizSettingsCopy.quesTypes) {
+        let question = getQuestion(
+          quesType,
+          quizQuestions,
+          quizSettingsCopy,
+          groupQuestions,
+        );
+        if (question != "Error") {
+          quiz.alphaQuestions.push(question);
+          quesFound = true;
+          console.log("Random AB", quesType.type);
+          console.log(quiz.alphaQuestions);
+          break;
+        }
+      }
+      if (!quesFound) return "Error";
+    }
   }
 
   shuffle(quiz.questions);
+  shuffle(quiz.alphaQuestions);
   return quiz;
 }
 
