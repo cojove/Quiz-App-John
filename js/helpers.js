@@ -66,3 +66,11 @@ function quesTypeIndexByType(type, quesTypes) {
 function consoleLog(data) {
   console.log(JSON.parse(JSON.stringify(data)));
 }
+
+function matchQuesByTypeList(ques, section, targetType, countTest) {
+  return quesInSection(ques, section) && targetType.includes(ques.typeDisplay) && countTest(ques.count);
+}
+
+function matchQuesByType(ques, section, targetType, countTest) {
+  return quesInSection(ques, section) && ques.type == targetType && countTest(ques.count);
+}
