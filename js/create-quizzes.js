@@ -1,222 +1,112 @@
-/*
-Primary Data Structures
-
-allQuestions, groupQuestions, quizQuestions: arrays of question objects.
-QUESTION OBJECT PROPERTIES:
-- id (#)
-- question
-- answer
-- book
-- ch
-- vs
-- type ("int"|"ma"|"ref"|"quote"|"finish"|"sit")
-- typeDisplay ("INT"|"MA"|"CVR"|"CRMA"|"FTV"|...)
-- club ("Club 50"|"Club 100"|...)
-- typeClub ("int-Club 50"|"ma-Club 100"|...)
-- w ("W"|"")
-
-QUIZSETTINGS.MATERIAL PROPERTIES:
-- material (array of section objects)
-- quesTypes (array of quesType objects)
-- allowDuplicateVerses
-- extraQues
-- finalQuiz
-- maxQuesUse
-- maxWs
-- numQuesInQuiz
-- numQuizzes
-- quizTitle
-- resetUsedQues
-- wCount
-
-SECTION OBJECT PROPERTIES:
-- book
-- ch
-- startVerse
-- endVerse
-- count
-
-QUESTYPE OBJECT PROPERTIES
-- type ("int"|"ma"|"ref"|"quote"|"finish"|"sit")
-- club
-- typeClubCombos (["int-Club 50", "int-Club 100", ...])
-- min
-- max
-- count
-- quesAvailable
-
-*/
-
-function createQuizzes(allQuestions, quizSettings) {
+function createQuizzes(allQuestions, settings) {
   // Make a deep copy of allQuestions and then filter questions based on quizSettings
   let groupQuestions = JSON.parse(JSON.stringify(allQuestions));
-  groupQuestions = filterQuestions(groupQuestions, quizSettings);
+  groupQuestions = filterQuestions(groupQuestions, settings);
 
   // Loop to get desired number of quizzes
   let quizzes = [];
   quizNum = 1;
-  while (quizzes.length < quizSettings.numQuizzes) {
-    let quiz = createQuiz(groupQuestions, quizSettings, quizNum);
+  while (quizzes.length < settings.numQuizzes) {
+    let quiz = createQuiz(groupQuestions, settings, quizNum);
     if (quiz == "Error") return { err: "Error", quizzes: quizzes };
     quizzes.push(quiz);
     quizNum++;
   }
 
-  //   Check Final Quiz
+  // Check Final Quiz
 
   // Check Extra Questions
 
   return { err: "", quizzes: quizzes };
 }
 
-// ********************
-// TIER 1 FUNCTIONS
-// ********************
-
-function filterQuestions(groupQuestions, quizSettings) {
+// Filter questions to match user settings
+function filterQuestions(groupQuestions, settings) {
   // Generate all possible TypeClub combinations by concatenating the typeClubCombos for each selected question type
   let selectedTypeClubCombos = [];
-  for (let quesType of quizSettings.quesTypes) {
-    selectedTypeClubCombos = selectedTypeClubCombos.concat(
-      quesType.typeClubCombos,
-    );
+  for (let quesType of settings.quesTypes) {
+    selectedTypeClubCombos = selectedTypeClubCombos.concat(quesType.typeClubCombos);
   }
 
   // Search for questions that meet quiz settings
   let filtered = [];
   for (let ques of groupQuestions) {
-    if (
-      quesInMaterial(ques, quizSettings.material) &&
-      selectedTypeClubCombos.includes(ques.typeClub)
-    ) {
-      filtered.push(ques);
+    if (quesInMaterial(ques, settings.material) && selectedTypeClubCombos.includes(ques.typeClub)) {
+      if (ques.w != "W" || (ques.w == "W" && !(settings.strictWs && settings.maxWs == 0))) {
+        filtered.push(ques);
+      }
     }
   }
-
+  consoleLog(filtered);
   return filtered;
 }
 
 // Create and return a single quiz, return "Error" if can't make quiz
-function createQuiz(groupQuestions, quizSettings, quizNum) {
-  //   Create deep copies of groupQuestions and quizSettings so that they are fresh versions for the current quiz.
-  let quizQuestions = JSON.parse(JSON.stringify(groupQuestions));
-  let quizSettingsCopy = JSON.parse(JSON.stringify(quizSettings));
-  console.log("Quiz Questions");
-  console.log(quizQuestions);
+function createQuiz(groupQuestions, settings, quizNum) {
+  // **** INIT QUIZ VARIABLES *****
+  // Create deep copies of groupQuestions and quizSettings so that they are fresh versions for the current quiz.
+  let quesPool = JSON.parse(JSON.stringify(groupQuestions));
+  settings = JSON.parse(JSON.stringify(settings));
 
   // Init quiz variable to store quiz title and questions
   let quiz = {
-    title: `#${quizNum}: ${quizSettingsCopy.quizTitle}`,
+    title: `#${quizNum}: ${settings.quizTitle}`,
     questions: [],
     alphaQuestions: [],
   };
 
+  // ***** GET REQUIRED REFERENCE QUESTIONS *****
   // If "ref" selected with a min of 2, get a CVR and a CR question to meet requirements of at least one of each.
-  if (minTwoRefQues(quizSettingsCopy.quesTypes)) {
+  if (minTwoRefQues(settings.quesTypes)) {
     // Get CVR question
-    let cvrQues = getRefQues(
-      ["CVR", "CVRMA"],
-      quizQuestions,
-      quizSettingsCopy,
-      groupQuestions,
-    );
-    if (cvrQues == "Error") {
-      console.log("No CVR");
-      return "Error";
-    }
-    quiz.questions.push(cvrQues);
-    console.log("CVR Found");
-    consoleLog(quiz.questions);
+    let res = getRefQues(["CVR", "CVRMA"], settings, quesPool, groupQuestions, quiz);
+    if (res == "Error" && settings.strictMinMax) return "Error";
 
     // Get CR question
-    let crQues = getRefQues(
-      ["CR", "CRMA"],
-      quizQuestions,
-      quizSettingsCopy,
-      groupQuestions,
-    );
-    if (crQues == "Error") {
-      console.log("No CR");
-      return "Error";
-    }
-    quiz.questions.push(crQues);
-    console.log("CR Found");
-    consoleLog(quiz.questions);
+    res = getRefQues(["CR", "CRMA"], settings, quesPool, groupQuestions, quiz);
+    if (res == "Error" && settings.strictMinMax) return "Error";
   }
 
-  // Meet Minimum Question Type Requirements
-  quizSettingsCopy.quesTypes = setTypeOrder(
-    quizSettingsCopy.quesTypes,
-    quizQuestions,
-  );
-  if (quizSettingsCopy.quesType == "Error") {
-    console.log("Error setting type order.");
-    return "Error";
+  // ***** MEET MINIMUM QUESTION REQUIREMENTS *****
+  // Set question type order based on supply and demand
+  settings.quesTypes = setTypeOrder(settings, quesPool);
+  if (settings.quesTypes == "Error") return "Error";
+
+  // Try to satisfy minimum requirements with unused questions
+  let allMinsFilled = getMinimumQuestions(settings, (n) => n == 0, quesPool, groupQuestions, quiz);
+
+  // If necessary, try to satisfy minimum requirements with used questions
+  if (!allMinsFilled) {
+    allMinsFilled = getMinimumQuestions(settings, (n) => n > 0, quesPool, groupQuestions, quiz);
+    if (!allMinsFilled & settings.strictMinMax) return "Error";
   }
 
-  for (let quesType of quizSettingsCopy.quesTypes) {
-    while (quesType.count < quesType.min) {
-      let question = getQuestion(
-        quesType,
-        quizQuestions,
-        quizSettingsCopy,
-        groupQuestions,
-      );
-      if (question == "Error") {
-        console.log("Error getting minimums", quesType);
-        return "Error";
-      }
-      quiz.questions.push(question);
-      console.log("Minimums", quesType.type);
-      console.log(quiz.questions);
-    }
+  // ***** RANDOMLY SELECT REMAINING NUMERIC 1-20 QUESTIONS
+
+  // Try to find unused questions to fill numeric questions
+  fillWithRandomQuestions(quiz.questions, 20, settings, (n) => n == 0, quesPool, groupQuestions);
+
+  // If necessary, try to find used questions to fill numeric questions
+  if (!settings.resetUsedQues) {
+    fillWithRandomQuestions(quiz.questions, 20, settings, (n) => n > 0, quesPool, groupQuestions);
   }
 
-  // Randomly Select Remaining Numeric 1-20 Questions
-  while (quiz.questions.length < 20) {
-    shuffle(quizSettingsCopy.quesTypes);
-    let quesFound = false;
-    for (let quesType of quizSettingsCopy.quesTypes) {
-      let question = getQuestion(
-        quesType,
-        quizQuestions,
-        quizSettingsCopy,
-        groupQuestions,
-      );
-      if (question != "Error") {
-        quiz.questions.push(question);
-        quesFound = true;
-        console.log("Random Numeric", quesType.type);
-        console.log(quiz.questions);
-        break;
-      }
-    }
-    // No question after searching through all question types
-    if (!quesFound) return "Error";
-  }
+  // Check if successful in finding numeric questions
+  if (quiz.questions.length != 20) return "Error";
 
-  // Randomly Select 10 A&B Questions
-  if (quizSettingsCopy.includeAB) {
-    while (quiz.alphaQuestions.length < 10) {
-      shuffle(quizSettingsCopy.quesTypes);
-      let quesFound = false;
-      for (let quesType of quizSettingsCopy.quesTypes) {
-        let question = getQuestion(
-          quesType,
-          quizQuestions,
-          quizSettingsCopy,
-          groupQuestions,
-        );
-        if (question != "Error") {
-          quiz.alphaQuestions.push(question);
-          quesFound = true;
-          console.log("Random AB", quesType.type);
-          console.log(quiz.alphaQuestions);
-          break;
-        }
-      }
-      if (!quesFound) return "Error";
+  // ***** RANDOMLY SELECT 10 A&B QUESTIONS ***** (If selected)
+
+  if (settings.includeAB) {
+    // First try to find unused questions to fill AB questions
+    fillWithRandomQuestions(quiz.alphaQuestions, 10, settings, (n) => n == 0, quesPool, groupQuestions);
+
+    // If necessary, try to find used questions to fill AB questions
+    if (!settings.resetUsedQues) {
+      fillWithRandomQuestions(quiz.alphaQuestions, 10, settings, (n) => n > 0, quesPool, groupQuestions);
     }
+
+    // Check if successful in finding numeric questions
+    if (quiz.alphaQuestions.length != 10) return "Error";
   }
 
   shuffle(quiz.questions);
@@ -224,141 +114,72 @@ function createQuiz(groupQuestions, quizSettings, quizNum) {
   return quiz;
 }
 
-function getRefQues(refTypes, quizQuestions, quizSettings, groupQuestions) {
-  // Try to find an unused question
-  let refQues = getUnusedRef(
-    refTypes,
-    quizQuestions,
-    quizSettings,
-    groupQuestions,
-  );
+function getRefQues(refList, settings, quesPool, groupQuestions, quiz) {
+  // First Try to get an unused CVR
+  let refQues = getAQues(refList, matchTypeList, (n) => n == 0, settings, quesPool, groupQuestions);
 
-  // If no unused questions, try to find a used question, if applicable
-  if (refQues == "Error" && !quizSettings.resetUsedQues) {
-    refQues = getUsedRef(refTypes, quizQuestions, quizSettings, groupQuestions);
+  // If no unused CVR, try to get a used CVR (if not resetting questions)
+  if (refQues == "Error" && !settings.resetUsedQues) {
+    refQues = getAQues(refList, matchTypeList, (n) => n > 0, settings, quesPool, groupQuestions);
   }
 
-  // Return Results: Found refQues or "Error"
-  return refQues;
+  // Deal with found or unfound CVR question
+  if (refQues == "Error") {
+    console.log(`No ${refList}`);
+    return "Error";
+  } else {
+    console.log(`${refList} Found`);
+    quiz.questions.push(refQues);
+  }
 }
 
-function getUnusedRef(refTypes, quizQuestions, quizSettings, groupQuestions) {
-  // Shuffle and Sort material by count to look for questions starting from the least used material
-  shuffleSortByCount(quizSettings.material);
+function getMinimumQuestions(settings, countTest, quesPool, groupQuestions, quiz) {
+  let allMinsFilled = true;
+  for (let quesType of settings.quesTypes) {
+    while (quesType.count < quesType.min) {
+      let question = getAQues(quesType.type, matchType, countTest, settings, quesPool, groupQuestions);
+      if (question == "Error") {
+        console.log("Error getting minimums", quesType);
+        allMinsFilled = false;
+        break;
+      }
+      quiz.questions.push(question);
+    }
+  }
+  return allMinsFilled;
+}
 
-  // Search material section by section for a ref question
-  for (let section of quizSettings.material) {
-    // Store all ref questions in matchedQuestions
-    matchedQuestions = [];
-    for (let ques of quizQuestions) {
-      if (
-        quesInSection(ques, section) &&
-        refTypes.includes(ques.typeDisplay) &&
-        ques.count == 0
-      ) {
-        matchedQuestions.push(ques);
+function fillWithRandomQuestions(arr, targetLength, settings, countTest, quesPool, groupQuestions) {
+  while (arr.length < targetLength) {
+    shuffle(settings.quesTypes);
+    let quesFound = false;
+    for (let quesType of settings.quesTypes) {
+      let question = getAQues(quesType.type, matchType, countTest, settings, quesPool, groupQuestions);
+      if (question != "Error") {
+        arr.push(question);
+        quesFound = true;
+        break;
       }
     }
+    // No question found after searching through all question types
+    if (!quesFound) break;
+  }
+}
+
+function getAQues(targetType, typeTest, countTest, settings, quesPool, groupQuestions) {
+  // Shuffle and Sort material by count to look for questions starting from the least used material
+  shuffleSortByCount(settings.material);
+
+  // Try to find an unused question: search material section by section for a question of quesType
+  for (let section of settings.material) {
+    // Store all matching questions in matchedQuestions
+    let matchedQuestions = quesPool.filter((ques) => typeTest(ques, section, targetType, countTest));
 
     // If matching results found, Randomly Select a Question from matchedQuestions
     if (matchedQuestions.length != 0) {
-      let selectedQues = randomElement(matchedQuestions);
-      processFoundQues(
-        selectedQues,
-        section,
-        quizQuestions,
-        quizSettings,
-        groupQuestions,
-      );
-      return selectedQues;
-    }
-  }
-  //   Checked all sections and did not find a matching question
-  return "Error";
-}
-
-function getUsedRef(refTypes, quizQuestions, quizSettings, groupQuestions) {
-  // Shuffle and Sort material by count to look for questions starting from the least used material
-  shuffleSortByCount(quizSettings.material);
-
-  // Search material section by section for a ref question
-  for (let section of quizSettings.material) {
-    // Store all ref questions in matchedQuestions
-    matchedQuestions = [];
-    for (let ques of quizQuestions) {
-      if (
-        quesInSection(ques, section) &&
-        refTypes.includes(ques.typeDisplay) &&
-        ques.count > 0
-      ) {
-        matchedQuestions.push(ques);
-      }
-    }
-
-    // If matching results found, shuffle and sort by count and get 1st question
-    if (matchedQuestions.length != 0) {
-      shuffleSortByCount(matchedQuestions);
+      shuffle(matchedQuestions);
       let selectedQues = matchedQuestions[0];
-      processFoundQues(
-        selectedQues,
-        section,
-        quizQuestions,
-        quizSettings,
-        groupQuestions,
-      );
-      return selectedQues;
-    }
-  }
-  //   Checked all sections and did not find a matching question
-  return "Error";
-}
-
-function getQuestion(quesType, quizQuestions, quizSettings, groupQuestions) {
-  // Try to find an unused question
-  let ques = getUnusedQues(
-    quesType,
-    quizQuestions,
-    quizSettings,
-    groupQuestions,
-  );
-
-  // If no unused questions, try to find a used question, if applicable
-  if (ques == "Error" && !quizSettings.resetUsedQues) {
-    ques = getUsedQues(quesType, quizQuestions, quizSettings, groupQuestions);
-  }
-
-  // Return Results: Found ques or "Error"
-  return ques;
-}
-
-function getUnusedQues(quesType, quizQuestions, quizSettings, groupQuestions) {
-  // Shuffle and Sort material by count to look for questions starting from the least used material
-  shuffleSortByCount(quizSettings.material);
-
-  // Try to find an unused question: search material section by section for a question of quesType
-  for (let section of quizSettings.material) {
-    // Store all matching questions in matchedQuestions
-    matchedQuestions = [];
-    for (let ques of quizQuestions) {
-      if (
-        quesInSection(ques, section) &&
-        ques.type == quesType.type &&
-        ques.count == 0
-      ) {
-        matchedQuestions.push(ques);
-      }
-    }
-
-    // If matching results found, Randomly Select a Question from matchedQuestions
-    if (matchedQuestions.length != 0) {
-      let selectedQues = randomElement(matchedQuestions);
-      processFoundQues(
-        selectedQues,
-        section,
-        quizQuestions,
-        quizSettings,
-        groupQuestions,
-      );
+      processFoundQues(selectedQues, section, quesPool, settings, groupQuestions);
       return selectedQues;
     }
   }
@@ -367,97 +188,51 @@ function getUnusedQues(quesType, quizQuestions, quizSettings, groupQuestions) {
   return "Error";
 }
 
-function getUsedQues(quesType, quizQuestions, quizSettings, groupQuestions) {
-  // Shuffle and Sort material by count to look for questions starting from the least used material
-  shuffleSortByCount(quizSettings.material);
-
-  // Try to find an unused question: search material section by section for a question of quesType
-  for (let section of quizSettings.material) {
-    // Store all matching questions in matchedQuestions
-    matchedQuestions = [];
-    for (let ques of quizQuestions) {
-      if (
-        quesInSection(ques, section) &&
-        ques.type == quesType.type &&
-        ques.count > 0
-      ) {
-        matchedQuestions.push(ques);
-      }
-    }
-
-    // If matching results found, shuffle and sort by count and get 1st question
-    if (matchedQuestions.length != 0) {
-      shuffleSortByCount(matchedQuestions);
-      let selectedQues = matchedQuestions[0];
-      processFoundQues(
-        selectedQues,
-        section,
-        quizQuestions,
-        quizSettings,
-        groupQuestions,
-      );
-      return selectedQues;
-    }
-  }
-
-  //   Checked all sections and did not find a matching question
-  return "Error";
-}
-
-function processFoundQues(
-  selectedQues,
-  section,
-  quizQuestions,
-  quizSettings,
-  groupQuestions,
-) {
-  // Remove question from quizQuestions - Verified
-  let quizQuesIndex = quesIndexByID(quizQuestions, selectedQues.id);
-  quizQuestions.splice(quizQuesIndex, 1);
+function processFoundQues(selectedQues, section, quesPool, settings, groupQuestions) {
+  // Remove question from quesPool - Verified
+  let quizQuesIndex = quesIndexByID(quesPool, selectedQues.id);
+  quesPool.splice(quizQuesIndex, 1);
 
   // If necessary, update question count in groupQuestions and remove question if used more than maxQuesUse - Verified
-  if (!quizSettings.resetUsedQues) {
+  if (!settings.resetUsedQues) {
     let groupQuesIndex = quesIndexByID(groupQuestions, selectedQues.id);
 
     groupQuestions[groupQuesIndex].count++;
-    if (groupQuestions[groupQuesIndex].count >= quizSettings.maxQuesUse) {
+    if (groupQuestions[groupQuesIndex].count >= settings.maxQuesUse) {
       groupQuestions.splice(groupQuesIndex, 1);
     }
   }
 
   // Remove duplicate verse questions if necessary
-  if (!quizSettings.allowDuplicateVerses) {
-    for (let i = quizQuestions.length - 1; i >= 0; i--) {
-      if (quizQuestions[i].ref == selectedQues.ref) {
-        quizQuestions.splice(i, 1);
+  if (!settings.allowDuplicateVerses) {
+    for (let i = quesPool.length - 1; i >= 0; i--) {
+      if (quesPool[i].ref == selectedQues.ref) {
+        quesPool.splice(i, 1);
       }
     }
   }
 
   // Check for update to "W" count and remove "W" questions if necessary
-  if (selectedQues.w == "W") {
-    quizSettings.wCount++;
-    if (quizSettings.wCount >= quizSettings.maxWs) {
-      for (let i = quizQuestions.length - 1; i >= 0; i--) {
-        if (quizQuestions[i].w == "W") {
-          quizQuestions.splice(i, 1);
+  if (selectedQues.w == "W" && settings.strictWs) {
+    settings.wCount++;
+    if (settings.wCount >= settings.maxWs) {
+      for (let i = quesPool.length - 1; i >= 0; i--) {
+        if (quesPool[i].w == "W") {
+          quesPool.splice(i, 1);
         }
       }
     }
   }
 
-  // Update question type count and remove questions of that type from quizQuestions and that question type from quesTypes, if necessary
-  let quesTypeIndex = quesTypeIndexByType(
-    selectedQues.type,
-    quizSettings.quesTypes,
-  );
-  let quesType = quizSettings.quesTypes[quesTypeIndex];
+  // Update question type count and remove questions of that type from quesPool and that question type from quesTypes, if necessary
+  let quesTypeIndex = quesTypeIndexByType(selectedQues.type, settings.quesTypes);
+  let quesType = settings.quesTypes[quesTypeIndex];
   quesType.count++;
-  if (quesType.count >= quesType.max) {
-    quizSettings.quesTypes.splice(quesTypeIndex, 1);
-    for (let i = quizQuestions.length - 1; i >= 0; i--) {
-      if (quizQuestions[i].type == quesType.type) {
-        quizQuestions.splice(i, 1);
+  if (settings.strictMinMax && quesType.count >= quesType.max) {
+    settings.quesTypes.splice(quesTypeIndex, 1);
+    for (let i = quesPool.length - 1; i >= 0; i--) {
+      if (quesPool[i].type == quesType.type) {
+        quesPool.splice(i, 1);
       }
     }
   }
@@ -466,10 +241,10 @@ function processFoundQues(
   section.count++;
 }
 
-function setTypeOrder(quesTypes, quizQuestions) {
+function setTypeOrder(settings, quesPool) {
   // Count # of questions available for each question type
-  for (let ques of quizQuestions) {
-    for (let quesType of quesTypes) {
+  for (let ques of quesPool) {
+    for (let quesType of settings.quesTypes) {
       if (quesType.typeClubCombos.includes(ques.typeClub)) {
         quesType.quesAvailable++;
       }
@@ -477,11 +252,11 @@ function setTypeOrder(quesTypes, quizQuestions) {
   }
 
   // Calculate order precedence for each question type, as long as enough questions are available
-  for (let quesType of quesTypes) {
-    if (quesType.quesAvailable < quesType.min) return "Error";
+  for (let quesType of settings.quesTypes) {
+    if (settings.strictMinMax && quesType.quesAvailable < quesType.min) return "Error";
     quesType.order = quesType.quesAvailable / quesType.min;
   }
 
   // Sort Question Types by "order" property (ascending)
-  return quesTypes.sort((a, b) => a.order - b.order);
+  return settings.quesTypes.sort((a, b) => a.order - b.order);
 }

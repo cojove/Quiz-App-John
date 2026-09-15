@@ -11,6 +11,7 @@
     <script src="js/random-lib.js"></script>
     <script src="js/helpers.js"></script>
     <script src="js/create-gui.js"></script>
+    <script src="js/user-input.js"></script>
     <script src="js/create-quizzes.js"></script>
     <script src="js/output-quizzes.js"></script>
     <script defer src="js/main.js"></script>
@@ -40,39 +41,30 @@
             <p>
               Number of Quizzes:
               <input id="num-quizzes" type="number" value="1" />
-              Max "W" Questions:
-              <input id="max-w" type="number" value="3" />
             </p>
             <p>
-              <label>
-                <input type="checkbox" id="allow-dupe" /> Allow Duplicate Verses
-                in a Quiz
-              </label>
+              <input type="checkbox" id="max-w" checked /> Max "W" Questions:
+              <input id="num-max-w" type="number" value="3" />
+            </p>
+            <p>
+              <label> <input type="checkbox" id="strict-min-max" checked /> Strictly Enforce Min/Max Types </label>
+            </p>
+            <p>
+              <label> <input type="checkbox" id="allow-dupe" /> Allow Duplicate Verses in a Quiz </label>
             </p>
 
             <p>
-              <label>
-                <input type="radio" name="ques-use" id="reset-ques" /> Reset
-                Used Questions each Quiz
-              </label>
+              <label> <input type="radio" name="ques-use" id="reset-ques" /> Reset Used Questions each Quiz </label>
             </p>
             <p>
               <label>
-                <input
-                  type="radio"
-                  name="ques-use"
-                  id="max-use-radio"
-                  checked
-                />
+                <input type="radio" name="ques-use" id="max-use-radio" checked />
                 Max Times a Question may be used:
                 <input type="number" id="max-use" value="1" />
               </label>
             </p>
             <p>
-              <label>
-                <input type="checkbox" id="include-ab" checked /> Include A & B
-                Questions
-              </label>
+              <label> <input type="checkbox" id="include-ab" checked /> Include A & B Questions </label>
             </p>
             <!-- <p>
               <label>
