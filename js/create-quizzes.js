@@ -76,9 +76,9 @@ function createQuiz(groupQuestions, settings, quizNum) {
   let allMinsFilled = getMinimumQuestions(settings, (n) => n == 0, quesPool, groupQuestions, quiz);
 
   // If necessary, try to satisfy minimum requirements with used questions
-  if (!allMinsFilled) {
+  if (!allMinsFilled && !settings.resetUsedQues) {
     allMinsFilled = getMinimumQuestions(settings, (n) => n > 0, quesPool, groupQuestions, quiz);
-    if (!allMinsFilled & settings.strictMinMax) return "Error";
+    if (!allMinsFilled && settings.strictMinMax) return "Error";
   }
 
   // ***** RANDOMLY SELECT REMAINING NUMERIC 1-20 QUESTIONS
