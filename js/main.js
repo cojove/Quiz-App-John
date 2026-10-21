@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
   // Load data from JohnData.json
-  const response = await fetch("./JohnData.json");
+  const response = await fetch("./JohnChurch.json");
   const johnData = await response.json();
 
   // Save questions globally for access from Event Listeners
@@ -55,13 +55,13 @@ document.getElementById("b-div-btn").addEventListener("click", (e) => {
  * getQuizSettings() in user-input.js
  * createQuizzes() in create-quizzes.js
  * outputQuizzes() in output-quizzes.js
-*/
+ */
 
 document.getElementById("create-qz-btn").addEventListener("click", (e) => {
   // Get and validate user selections.
   let settings = getQuizSettings();
   if (settings == "Error") return false;
-  
+
   // Send Quiz Settings and All Questions for Quiz Creation
   let response = createQuizzes(allQuestions, settings);
   if (response.err == "Error") {
@@ -70,6 +70,3 @@ document.getElementById("create-qz-btn").addEventListener("click", (e) => {
     outputQuizzes(response.quizzes, settings);
   }
 });
-
-
-
